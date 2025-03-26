@@ -53,6 +53,8 @@ services:
       - static:/static
     expose:
       - 9000
+    ports:
+      - "9000:9000"
     networks:
       - ub
     depends_on:

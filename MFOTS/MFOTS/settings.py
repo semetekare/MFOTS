@@ -81,17 +81,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'MFOTS.wsgi.application'
 ASGI_APPLICATION = 'MFOTS.asgi.application'
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": CONFIG.DB_NAME,
-        "USER": CONFIG.DB_USER,
-        "PASSWORD": CONFIG.DB_PASSWORD,
-        "HOST": CONFIG.DB_HOST,
-        "PORT": CONFIG.DB_PORT,
-        "TEST": {"NAME": "test_" + CONFIG.DB_NAME},
-    },
-}
+
 
 
 # Django Channels layers
@@ -99,7 +89,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [(CONFIG.REDIS_HOST, CONFIG.REDIS_PORT)],
+            "hosts": [(CONFIG.REDIS_HOST, CONFIG.REDIS_PORT, 0)],
             "symmetric_encryption_keys": [SECRET_KEY],
         },
     },
@@ -110,12 +100,16 @@ CHANNEL_LAYERS = {
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": CONFIG.DB_NAME,
+        "USER": CONFIG.DB_USER,
+        "PASSWORD": CONFIG.DB_PASSWORD,
+        "HOST": CONFIG.DB_HOST,
+        "PORT": CONFIG.DB_PORT,
+        "TEST": {"NAME": "test_" + CONFIG.DB_NAME},
+    },
 }
 
 

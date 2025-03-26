@@ -53,4 +53,3 @@ class TrafficLight(models.Model):
     intersection = models.ForeignKey(Intersection, on_delete=models.CASCADE)
     current_phase = models.CharField(max_length=20)
     phase_duration = models.IntegerField()
-

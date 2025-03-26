@@ -17,6 +17,10 @@ services:
       - DB_PASSWORD=3803
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+    volumes:
+      - ./MFOTS/:/MFOTS/
+      - media_volume:/media
+      - static:/static
     expose:
       - 8000
     ports:
@@ -43,6 +47,10 @@ services:
       - DB_PASSWORD=3803
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+    volumes:
+      - ./MFOTS/:/MFOTS/
+      - media_volume:/media
+      - static:/static
     expose:
       - 9000
     networks:
@@ -106,6 +114,6 @@ networks:
 volumes:
   postgres_data:
   media_volume:
-  backend_static:
+  static:
   redis_data:
 

@@ -2,7 +2,7 @@ from django.db import models
 import uuid
 
 class Intersection(models.Model):
-    location = models.PointField()
+    #location = models.PointField()
     name = models.CharField(max_length=100)
 
 class Sensor(models.Model):

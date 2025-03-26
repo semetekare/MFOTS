@@ -17,6 +17,7 @@ services:
       - DB_PASSWORD=3803
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - REDIS_DB=0
     volumes:
       - ./MFOTS/:/MFOTS/
       - media_volume:/media

@@ -45,6 +45,9 @@ INSTALLED_APPS = [
     'main.apps.MainConfig',
     'rest_framework',
     'channels',
+    'traffic_light.apps.TrafficLightConfig',
+    'dynamic_data.apps.DynamicDataConfig',
+    'cars.apps.CarsConfig',
 ]
 
 MIDDLEWARE = [

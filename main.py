@@ -1,91 +1,101 @@
-import time
 import json
+from datetime import datetime
+from collections import defaultdict
 
-# Класс для представления светофора
-class TrafficLight:
-    def __init__(self, direction):
-        self.direction = direction
-        self.state = "red"  # Начальное состояние
+# Загрузка данных
+with open('JSON\Олимпийский20_03_2025_17_35.json', 'r') as f:
+    data = json.load(f)
 
-    def switch_to_green(self):
-        self.state = "green"
+# Словарь для подсчета уникальных машин по секундам
+#time_intervals = defaultdict(set)
 
-    def switch_to_red(self):
-        self.state = "red"
+# Словарь для подсчета уникальных машин по секундам и линиям
+# Структура: {время: {lane: set(uuids)}}
+time_lane_intervals = defaultdict(lambda: defaultdict(set))
 
-    def __repr__(self):
-        return f"{self.direction}: {self.state}"
+'''
+# Обработка данных
+for obj in data['objects']:
+    if obj['name'] == 'OBJECTS':
+        for row in obj['rows_data']:
+            time_str = row['time']
+            uuid = row['uuid']
+            time = datetime.strptime(time_str, '%Y-%m-%d %H:%M:%S.%f')
+            interval = time.replace(microsecond=0)  # Группировка по секундам
+            time_intervals[interval].add(uuid)
+            
+# Вывод результатов
+print("Интенсивность потока (машин/сек):")
+for interval, uuids in sorted(time_intervals.items()):
+    print(f"{interval}: {len(uuids)}")
+'''
 
+# Собираем все номера линий для корректного расчёта (если для какого-то временного интервала линия отсутствует)
+all_lanes = set()
 
-# Функция для загрузки данных с датчиков из JSON-файла
-def load_sensor_data(json_file):
-    with open(json_file, 'r') as f:
-        data = json.load(f)
-    return data
+# Обработка данных
+for obj in data['objects']:
+    if obj['name'] == 'OBJECTS':
+        for row in obj['rows_data']:
+            time_str = row['time']
+            lane = row['lane']
+            uuid = row['uuid']
+            time_obj = datetime.strptime(time_str, '%Y-%m-%d %H:%M:%S.%f')
+            time_interval = time_obj.replace(microsecond=0)  # Группировка по секундам
+            time_lane_intervals[time_interval][lane].add(uuid)
+            all_lanes.add(lane)
 
+# Вывод результатов: сначала по времени, затем по lane
+print("Интенсивность потока (машин/сек по линиям):")
+for time_interval in sorted(time_lane_intervals):
+    print(f"{time_interval}:")
+    for lane in sorted(time_lane_intervals[time_interval]):
+        count = len(time_lane_intervals[time_interval][lane])
+        print(f"   Линия {lane}: {count} машин")
 
-# Функция оптимизации переключения светофоров с учетом данных датчиков
-def optimize_traffic_lights(traffic_lights, sensor_data):
-    sensors = sensor_data["sensors"]
-    params = sensor_data["parameters"]
-    min_green_duration = params.get("min_green_duration", 5)
-    max_green_duration = params.get("max_green_duration", 30)
-    cycle_duration = params.get("cycle_duration", 60)
+'''
+# Расчет пропускной способности
+total_cars = sum(len(uuids) for uuids in time_intervals.values())
+total_seconds = len(time_intervals)
+average_per_second = total_cars / total_seconds if total_seconds > 0 else 0
+'''
 
-    # Суммарное количество транспортных средств на всех направлениях
-    total_vehicle_count = sum(sensor["vehicle_count"] for sensor in sensors)
+# Расчёт пропускной способности по каждой линии
+lane_capacities = {}
 
-    # Если машин нет, выбираем первое направление по умолчанию
-    if total_vehicle_count == 0:
-        selected_direction = traffic_lights[0].direction
-        green_time = min_green_duration
-    else:
-        # Вычисляем долю для каждого направления
-        proportions = {sensor["direction"]: sensor["vehicle_count"] / total_vehicle_count for sensor in sensors}
-        # Выбираем направление с наибольшей нагрузкой
-        selected_direction = max(proportions, key=proportions.get)
-        # Расчет длительности зеленого сигнала пропорционально нагрузке
-        green_time = min_green_duration + proportions[selected_direction] * (max_green_duration - min_green_duration)
+# Для каждого lane посчитаем общее количество машин и количество секунд, учитывая, что если для какого-то секунды нет данных по линии – считаем 0.
+# Количество секунд определяется как общее число временных интервалов (так как анализ проводился с одинаковой разбиением по времени)
+total_time_intervals = len(time_lane_intervals)
 
-    # Переключаем светофоры: выбранному направлению даем зеленый, остальные – красный
-    for light in traffic_lights:
-        if light.direction.lower() == selected_direction.lower():
-            light.switch_to_green()
-        else:
-            light.switch_to_red()
+for lane in all_lanes:
+    total_cars_lane = 0
+    # Для каждого временного интервала получаем количество машин на данной линии (если данных нет – 0)
+    for time_interval in time_lane_intervals:
+        total_cars_lane += len(time_lane_intervals[time_interval].get(lane, set()))
+    # Среднее количество машин в секунду для линии
+    average_per_second_lane = total_cars_lane / total_time_intervals if total_time_intervals > 0 else 0
+    # Пропускная способность линии в час (экстраполяция)
+    capacity_per_hour_lane = average_per_second_lane * 3600
+    lane_capacities[lane] = average_per_second_lane
 
-    print(f"Выбрано направление: {selected_direction}, зеленый свет на {green_time:.1f} секунд")
-    for light in traffic_lights:
-        print(light)
+# Вывод результатов по линиям
+print("\nПропускная способность по линиям (машин/сек):")
+for lane in sorted(lane_capacities):
+    print(f"Линия {lane}: ~{int(lane_capacities[lane])} машин/сек")
 
-    # Держим зеленый свет на рассчитанное время
-    time.sleep(green_time)
+# Расчёт общей пропускной способности (сумма по всем линиям)
+total_capacity = sum(lane_capacities.values())
+print(f"\nОбщая пропускная способность: ~{int(total_capacity)} машин/сек")
 
-    # По окончании цикла сбрасываем состояние светофоров
-    print("Цикл завершен. Сброс состояния светофоров.")
-    for light in traffic_lights:
-        light.switch_to_red()
+'''
+# Расчет пропускной способности
+total_cars = sum(len(uuids) for uuids in time_lane_intervals.values())
+total_seconds = len(time_lane_intervals)
+average_per_second = total_cars / total_seconds if total_seconds > 0 else 0
 
-    # Оставшееся время цикла (если green_time меньше общего времени цикла)
-    remaining = max(0, cycle_duration - green_time)
-    if remaining > 0:
-        time.sleep(remaining)
+print(f"\nПропускная способность: ~{int(average_per_second)} машин/сек")
 
+capacity_per_hour = average_per_second * 3600
 
-def main():
-    # Загружаем данные с датчиков из файла sensor_data.json
-    sensor_data = load_sensor_data("sensor_data.json")
-    # Инициализируем светофоры для 4 направлений
-    directions = ["North", "South", "East", "West"]
-    traffic_lights = [TrafficLight(direction) for direction in directions]
-
-    # Запускаем алгоритм переключения светофоров в бесконечном цикле
-    while True:
-        optimize_traffic_lights(traffic_lights, sensor_data)
-        print("-" * 40)
-        # Краткая задержка перед началом нового цикла
-        time.sleep(1)
-
-
-if __name__ == "__main__":
-    main()
+print(f"\nПропускная способность: ~{int(capacity_per_hour)} машин/час")
+'''

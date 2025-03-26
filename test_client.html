@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket Клиент</title>
+</head>
+<body>
+    <h1>WebSocket Клиент</h1>
+    <button id="connect">Подключиться</button>
+    <button id="send" disabled>Отправить сообщение</button>
+    <div id="messages"></div>
+
+    <script>
+        let socket;
+        const messagesDiv = document.getElementById('messages');
+        const connectButton = document.getElementById('connect');
+        const sendButton = document.getElementById('send');
+
+        connectButton.addEventListener('click', () => {
+            socket = new WebSocket('ws://localhost:9000/ws/test/'); // Замените на ваш URL
+
+            socket.onopen = () => {
+                messagesDiv.innerHTML += '<p>WebSocket открыт</p>';
+                sendButton.disabled = false;
+            };
+
+            socket.onmessage = (e) => {
+                const data = JSON.parse(e.data);
+                messagesDiv.innerHTML += `<p>Сообщение от сервера: ${data.message}</p>`;
+            };
+
+            socket.onclose = () => {
+                messagesDiv.innerHTML += '<p>WebSocket закрыт</p>';
+                sendButton.disabled = true;
+            };
+
+            socket.onerror = (e) => {
+                messagesDiv.innerHTML += `<p>Ошибка WebSocket</p>`;
+            };
+        });
+
+        sendButton.addEventListener('click', () => {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({ message: 'Привет, WebSocket!' }));
+            }
+        });
+    </script>
+</body>
+</html>

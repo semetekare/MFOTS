@@ -80,7 +80,7 @@ def group_by_time(objects):
 
 # Основной цикл программы
 def main():
-    filename = 'JSON/Олимпийский20_03_2025_17_35.json'
+    filename = 'MFOTS/json/Олимпийский20_03_2025_17_35.json'
     objects = load_json(filename)
     time_frames, min_x = group_by_time(objects)
 
@@ -186,9 +186,9 @@ def main():
                     break
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_EQUALS:  # Клавиша "+" на клавиатуре
-                        duration = max(0.01, duration - 0.02)  # Уменьшаем продолжительность анимации
+                        duration = max(0.01, duration - 0.02)  # Увеличиваем скорость анимации
                     elif event.key == pygame.K_MINUS:  # Клавиша "-" на клавиатуре
-                        duration = min(0.5, duration + 0.02)  # Увеличиваем продолжительность анимации
+                        duration = min(0.5, duration + 0.02)  # Уменьшаем скорость анимации
 
         # После анимации обновляем текущие позиции
         current_positions = target_positions.copy()

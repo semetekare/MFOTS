@@ -1,0 +1,151 @@
+/* Подключение красивого шрифта */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+/* Основные стили */
+body {
+    font-family: 'Poppins', Arial, sans-serif;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #1e1e1e;
+    color: white;
+}
+
+/* Основной контейнер */
+.app-container {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+}
+
+/* Боковое меню */
+.sidebar {
+    width: 250px;
+    background: linear-gradient(135deg, #232526, #414345);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.3);
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Логотип */
+.logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Центрирование содержимого */
+    text-align: center;
+    width: 100%;
+}
+
+.logo img {
+    width: 80px;
+    margin-bottom: 10px;
+}
+
+.logo p {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0;
+    color: #ffffff;
+}
+
+/* Меню */
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.menu a {
+    color: white;
+    text-decoration: none;
+    font-size: 1.2rem;
+    font-weight: 500;
+    padding: 12px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    transition: background 0.3s, transform 0.2s ease-in-out;
+}
+
+.menu a:hover {
+    background: #ff0007;
+    color: white;
+    transform: scale(1.07);
+    box-shadow: 0 4px 8px rgb(119, 0, 6);
+}
+
+/* Основной контент */
+.simulation-container {
+    margin-left: 250px; /* Учитываем ширину бокового меню */
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #2e2e2e;
+    padding: 20px;
+    transition: margin-left 0.3s ease-in-out;
+}
+
+/* Интерфейс симуляции */
+.intersection {
+    width: 80%;
+    max-width: 600px;
+    height: 400px;
+    background: #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-shadow: 2px 2px 5px rgba(255, 0, 0, 0.7);
+    border-radius: 12px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.5);
+    transition: box-shadow 0.3s ease-in-out;
+}
+
+.intersection:hover {
+    box-shadow: 0px 6px 16px rgba(255, 0, 0, 0.5);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        height: auto;
+        padding: 15px;
+        position: relative;
+        box-shadow: none;
+    }
+
+    .menu {
+        flex-direction: row;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .simulation-container {
+        margin-left: 0;
+        width: 100%;
+        padding: 10px;
+    }
+
+    .intersection {
+        width: 100%;
+        max-width: 100%;
+        height: 300px;
+        font-size: 1.2rem;
+    }
+}

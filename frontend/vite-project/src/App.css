@@ -7,13 +7,13 @@
 }
 
 .traffic_small img {
-  width: 60%; /* Картинка будет занимать 100% ширины блока */
+  width: 60%;
 
 }
 
 .text_block {
   text-align: center;
-  max-width: 80%; /* Ограничиваем ширину текста */
+  max-width: 80%;
 }
 
 h1 {
@@ -23,23 +23,3 @@ h1 {
   margin-bottom: 10px;
 }
 
-button {
-  border-radius: 100px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1.5em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-  margin-top: 5%;
-  margin-left: 35%;
-}
-button:hover {
-  border-color: #202127;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}

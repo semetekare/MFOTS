@@ -136,7 +136,7 @@ def main() -> None:
     # Параметры
     input_dir = 'MFOTS/json/'  # Папка с входными JSON-файлами
     output_dir = 'MFOTS/metrics_results/'  # Папка для сохранения результатов
-    input_file = 'JSON/Олимпийский20_03_2025_17_35.json'
+    input_file = 'MFOTS/json/Олимпийский20_03_2025_17_35.json'
     output_file = 'metrics.json'
     
     green_time = 45  # T_g (сек)

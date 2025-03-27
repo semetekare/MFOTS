@@ -152,9 +152,12 @@ def main():
             screen.fill(BACKGROUND_COLOR)
             draw_lanes()
             draw_intersection()
-            # Выводим время кадра (опционально)
-            time_text = font.render(f"Время: {current_time} | Отображается кадр {frame_index + 1}/{len(time_frames)}", True, (255, 255, 255))
+
+            # Выводим время кадра
+            time_text = font.render(f"Время: {current_time}", True, (255, 255, 255))
             screen.blit(time_text, (220, 20))
+            frame_text = font.render(f"Отображается кадр {frame_index + 1}/{len(time_frames)}", True, (255, 255, 255))
+            screen.blit(frame_text, (SCREEN_WIDTH / 2, 20))
 
             # Отображаем значение duration
             duration_text = font.render(f"Скорость анимации: {duration:.2f} сек", True, (255, 255, 255))

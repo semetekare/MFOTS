@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Test WebSocket</title>
+</head>
+<body>
+<h1>WebSocket Test</h1>
+<pre id="output"></pre>
+<script>
+    // Замените localhost:9000 на адрес вашего webasgi-контейнера
+    const socket = new WebSocket('ws://' + 'localhost:9000' + '/ws/test/');
+    const output = document.getElementById('output');
+
+    socket.onopen = () => {
+        console.log('WebSocket connected');
+        output.textContent += 'WebSocket connected\n';
+    };
+    socket.onerror = (e) => {
+        console.error('WebSocket error:', e);
+        output.textContent += 'WebSocket error\n';
+    };
+    socket.onclose = () => {
+        console.log('WebSocket closed');
+        output.textContent += 'WebSocket closed\n';
+    };
+
+    socket.onmessage = (e) => {
+        try {
+            const data = JSON.parse(e.data);
+            console.log('Received:', data);
+            output.textContent += 'Received: ' + JSON.stringify(data) + '\n';
+        } catch (err) {
+            console.error('Parse error:', err);
+        }
+    };
+</script>
+</body>
+</html>

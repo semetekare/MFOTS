@@ -1,9 +1,7 @@
 import json
 from datetime import datetime
 from collections import defaultdict
-from typing import Dict, Tuple, Set
-
-from temp import green_time
+from typing import Dict, Tuple, Set, Any
 
 
 def load_data(file_path: str) -> dict:
@@ -51,24 +49,22 @@ def calculate_flow_intensity_per_lane(time_lane_intervals: Dict[datetime, Dict[i
     return total_cars, lane_flow
 
 
-def calculate_capacity(all_lanes: Set[int], green_time: float, red_time: float, saturation_flow: float = 0.25) -> float:
+def calculate_capacity(all_lanes: Set[int], green_time: float, cycle_time: float, saturation_flow: float = 0.25) -> float:
     """
     Рассчитывает общую пропускную способность (машин/сек) перекрёстка.
     """
     # (len(all_lanes) * total_flow_intensity) / green_time
     # total_flow_intensity * green_time
-    cycle_time = green_time + red_time
-    if cycle_time == 0:
-        return 0.0
     return len(all_lanes) * saturation_flow * (green_time / cycle_time)
 
 
 def calculate_queue_length_per_lane(lane_flow: Dict[int, float],
                                     red_time: float, car_length: float, capacity: float
-                                    ) -> Tuple[Dict[int, float], Dict[int, float], Dict[int, float], Dict[int, float]]:
+                                    ) -> Tuple[Dict[int, float], Dict[int, float], Dict[int, float], Dict[int, float], Dict[int, float]]:
     """
     Вычисляет длину очереди по каждой полосе в метрах и секундах, а также скорость увеличения очереди и задержку очереди.
     """
+    queue_cars = {}
     queue_lengths_m = {}
     queue_lengths_sec = {}
     queue_increases = {}
@@ -77,22 +73,21 @@ def calculate_queue_length_per_lane(lane_flow: Dict[int, float],
     saturation_flow = 0.25 # насыщенный поток = 0.25 машин/сек
 
     for lane, flow in lane_flow.items():
+        queue_cars[lane] = flow * red_time
         queue_lengths_m[lane] = flow * red_time * car_length
-        queue_lengths_sec[lane] = (flow**2 * red_time) / saturation_flow
+        queue_lengths_sec[lane] = (flow * red_time) / saturation_flow
         queue_increases[lane] = flow * car_length
-        #queue_delays[lane] = (flow * red_time * car_length) / (2 * flow) if flow else 0.0
-        #queue_delays[lane] = (flow * red_time * car_length) / 2
-        #queue_delays[lane] = red_time / 2 # Задержка очереди при равномерном поступлении машин
-        queue_delays[lane] = (flow * red_time**2) / (2 * saturation_flow)
+        queue_delays[lane] = (flow * red_time) / (2 * saturation_flow)
 
-    return queue_lengths_m, queue_lengths_sec, queue_increases, queue_delays
+    return queue_cars, queue_lengths_m, queue_lengths_sec, queue_increases, queue_delays
 
 
 def print_all_results(time_lane_intervals: Dict[datetime, Dict[int, Set[str]]],
                       total_cars: Dict[int, int],
                       lane_flow: Dict[int, float],
                       total_flow_intensity: float,
-                      capacity: float,
+                      total_capacity: float,
+                      queue_cars: Dict[int, float],
                       queue_lengths_m: Dict[int, float],
                       queue_lengths_sec: Dict[int, float],
                       queue_increases: Dict[int, float],
@@ -108,17 +103,18 @@ def print_all_results(time_lane_intervals: Dict[datetime, Dict[int, Set[str]]],
     print("\nИнформация по полосам:")
     for lane in sorted(queue_lengths_m):
         print(f"Полоса {lane}:")
-        print(f"  Общее число временных интервалов (T): {len(time_lane_intervals)} сек")
-        print(f"  Количество машин (N): {total_cars[lane]} машин")
-        print(f"  Интенсивность потока (λ): ~{lane_flow[lane]:.2f} машин/сек\n")
+        print(f"  Период наблюдения (T): {len(time_lane_intervals)} сек")
+        print(f"  Общее число машин (N): {total_cars[lane]} машин")
+        print(f"  Средняя интенсивность потока (λ): ~{lane_flow[lane]:.2f} машин/сек\n")
 
+        print(f"  Число машин в очереди: ~{queue_cars[lane]:.2f} машин")
         print(f"  Длина очереди (L_qm) в метрах: ~{queue_lengths_m[lane]:.2f} м")
         print(f"  Длина очереди (L_qs) в секундах: ~{queue_lengths_sec[lane]:.2f} сек")
         print(f"  Скорость увеличения очереди (V_q): ~{queue_increases[lane]:.2f} м/с")
-        print(f"  Задержка очереди (D): ~{queue_delays[lane]:.2f} сек\n")
+        print(f"  Задержка в очереди (D): ~{queue_delays[lane]:.2f} сек\n")
 
     print(f"\nОбщая интенсивность потока (λ): ~{total_flow_intensity:.2f} машин/сек")
-    print(f"\nПропускная способность перекрёстка (μ): ~{capacity:.2f} машин/сек")
+    print(f"\nОбщая пропускная способность перекрёстка (μ): ~{total_capacity:.2f} машин/сек")
 
 
 def main() -> None:
@@ -131,15 +127,14 @@ def main() -> None:
 
     data = load_data(file_path)
     time_lane_intervals, all_lanes = process_data(data)
-    print(len(time_lane_intervals))
     total_cars, lane_flow = calculate_flow_intensity_per_lane(time_lane_intervals, all_lanes)
     total_flow_intensity = sum(lane_flow.values())
-    capacity = calculate_capacity(all_lanes, green_time, red_time)
+    total_capacity = calculate_capacity(all_lanes, green_time, cycle_time)
 
-    queue_lengths_m, queue_lengths_sec, queue_increases, queue_delays = calculate_queue_length_per_lane(lane_flow, red_time, car_length, capacity)
+    queue_cars, queue_lengths_m, queue_lengths_sec, queue_increases, queue_delays = calculate_queue_length_per_lane(lane_flow, red_time, car_length, total_capacity)
 
-    print_all_results(time_lane_intervals, total_cars, lane_flow, total_flow_intensity, capacity,
-                      queue_lengths_m, queue_lengths_sec, queue_increases, queue_delays)
+    print_all_results(time_lane_intervals, total_cars, lane_flow, total_flow_intensity, total_capacity,
+                      queue_cars, queue_lengths_m, queue_lengths_sec, queue_increases, queue_delays)
 
 
 if __name__ == '__main__':

@@ -3,7 +3,9 @@ from datetime import datetime, timedelta
 from collections import defaultdict
 from typing import Dict, Tuple, Set, List, Any
 import os
+
 import glob
+
 
 
 def load_data(file_path: str) -> dict:
@@ -129,10 +131,14 @@ def process_single_file(input_file: str, output_dir: str,
     print(f"Результаты для {input_file} сохранены в {output_file}")
 
 
+
 def main() -> None:
     # Параметры
     input_dir = 'MFOTS/json/'  # Папка с входными JSON-файлами
     output_dir = 'MFOTS/metrics_results/'  # Папка для сохранения результатов
+    input_file = 'JSON/Олимпийский20_03_2025_17_35.json'
+    output_file = 'metrics.json'
+    
     green_time = 45  # T_g (сек)
     red_time = 30  # T_r (сек)
     car_length = 4.5  # L (м)
@@ -157,6 +163,25 @@ def main() -> None:
                                 car_length, cycle_time)
         except Exception as e:
             print(f"Ошибка при обработке файла {input_file}: {str(e)}")
+
+    # Загрузка и обработка данных
+    data = load_data(input_file)
+    time_lane_intervals, all_lanes = process_data(data)
+
+    # Расчет метрик для каждой секунды
+    results = calculate_metrics_per_second(
+        time_lane_intervals,
+        all_lanes,
+        red_time,
+        car_length,
+        green_time,
+        cycle_time
+    )
+
+    # Сохранение результатов
+    save_results_to_json(results, output_file)
+    print(f"Результаты сохранены в {output_file}")
+
 
 
 if __name__ == '__main__':

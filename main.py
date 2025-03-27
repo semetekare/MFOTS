@@ -4,6 +4,9 @@ from collections import defaultdict
 from typing import Dict, Tuple, Set, List, Any
 import os
 
+import glob
+
+
 
 def load_data(file_path: str) -> dict:
     """Загружает данные из JSON-файла."""
@@ -99,14 +102,67 @@ def save_results_to_json(results: List[Dict[str, Any]], output_file: str) -> Non
         json.dump(results, f, indent=4, ensure_ascii=False)
 
 
+def process_single_file(input_file: str, output_dir: str,
+                        green_time: float, red_time: float,
+                        car_length: float, cycle_time: float) -> None:
+    """Обрабатывает один файл и сохраняет результаты."""
+    # Создаем имя выходного файла
+    base_name = os.path.basename(input_file)
+    output_name = f"metrics_{base_name}"
+    output_file = os.path.join(output_dir, output_name)
+
+
+    # Загрузка и обработка данных
+    data = load_data(input_file)
+    time_lane_intervals, all_lanes = process_data(data)
+
+    # Расчет метрик
+    results = calculate_metrics_per_second(
+        time_lane_intervals,
+        all_lanes,
+        red_time,
+        car_length,
+        green_time,
+        cycle_time
+    )
+
+    # Сохранение результатов
+    save_results_to_json(results, output_file)
+    print(f"Результаты для {input_file} сохранены в {output_file}")
+
+
+
 def main() -> None:
     # Параметры
+    input_dir = 'MFOTS/json/'  # Папка с входными JSON-файлами
+    output_dir = 'MFOTS/metrics_results/'  # Папка для сохранения результатов
     input_file = 'JSON/Олимпийский20_03_2025_17_35.json'
     output_file = 'metrics.json'
+    
     green_time = 45  # T_g (сек)
     red_time = 30  # T_r (сек)
     car_length = 4.5  # L (м)
     cycle_time = green_time + red_time  # T_c (сек)
+
+    # Создаем папку для результатов, если ее нет
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    # Находим все JSON-файлы в папке
+    input_files = glob.glob(os.path.join(input_dir, '*.json'))
+
+    if not input_files:
+        print(f"Не найдено JSON-файлов в папке {input_dir}")
+        return
+
+    # Обрабатываем каждый файл
+    for input_file in input_files:
+        try:
+            process_single_file(input_file, output_dir,
+                                green_time, red_time,
+                                car_length, cycle_time)
+        except Exception as e:
+            print(f"Ошибка при обработке файла {input_file}: {str(e)}")
 
     # Загрузка и обработка данных
     data = load_data(input_file)
@@ -125,6 +181,7 @@ def main() -> None:
     # Сохранение результатов
     save_results_to_json(results, output_file)
     print(f"Результаты сохранены в {output_file}")
+
 
 
 if __name__ == '__main__':

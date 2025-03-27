@@ -1,8 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import "./Model_traffic_light.css";
+import "./Graphics_traffic_light.css";
 
-function ModelTrafficLight() {
+function GraphicsTrafficLight() {
     return (
         <div className="app-container">
             <aside className="sidebar">
@@ -19,11 +19,11 @@ function ModelTrafficLight() {
             </aside>
             <main className="simulation-container expanded">
                 <div className="intersection">
-                    <p>Тут будет симуляция...</p>
+                    <p>Тут будет график</p>
                 </div>
             </main>
         </div>
     );
 }
 
-export default ModelTrafficLight;
+export default GraphicsTrafficLight;
